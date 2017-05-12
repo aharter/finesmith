@@ -28,7 +28,7 @@ func (st *StructuredText) Decode(_ string, enc interface{}) error {
 		}
 		var b block.Block
 		switch dec["type"] {
-		case "heading1", "heading2", "heading3", "heading4":
+		case "heading1", "heading2", "heading3", "heading4", "heading5":
 			b = new(block.Heading)
 		case "paragraph":
 			b = new(block.Paragraph)

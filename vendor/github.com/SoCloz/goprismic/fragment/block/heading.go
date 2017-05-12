@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// A heading (h1, h2, h3, h4) block
+// A heading (h1, h2, h3, h4, h5, h6) block
 type Heading struct {
 	BaseBlock
 }
@@ -23,6 +23,10 @@ func (h *Heading) AsHtml() string {
 		return fmt.Sprintf("<h3>%s</h3>", h.FormatHtmlText())
 	case "heading4":
 		return fmt.Sprintf("<h4>%s</h4>", h.FormatHtmlText())
+	case "heading5":
+		return fmt.Sprintf("<h5>%s</h5>", h.FormatHtmlText())
+	case "heading6":
+		return fmt.Sprintf("<h6>%s</h6>", h.FormatHtmlText())
 	}
 	return ""
 }
