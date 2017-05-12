@@ -1,6 +1,31 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"package": [],
+	"package": [
+		{
+			"path": "github.com/SoCloz/goprismic",
+		},
+		{
+			"path": "github.com/SoCloz/goprismic/fragment",
+		},
+		{
+			"path": "github.com/SoCloz/goprismic/fragment/block",
+		},
+		{
+			"path": "github.com/SoCloz/goprismic/fragment/embed",
+		},
+		{
+			"path": "github.com/SoCloz/goprismic/fragment/image",
+		},
+		{
+			"path": "github.com/SoCloz/goprismic/fragment/link",
+		},
+		{
+			"path": "github.com/SoCloz/goprismic/fragment/span",
+		},
+		{
+			"path": "github.com/SoCloz/goprismic/proxy",
+		},
+	],
 	"rootPath": "github.com/aharter/finesmith"
 }
