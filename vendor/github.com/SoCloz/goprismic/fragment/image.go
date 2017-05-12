@@ -1,6 +1,7 @@
 package fragment
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -52,3 +53,16 @@ func (i *Image) AsHtml() string {
 }
 
 func (i *Image) ResolveLinks(_ link.Resolver) {}
+
+func (i *Image) MarshalJSON() ([]byte, error) {
+	type Alias Image
+	return json.Marshal(&struct {
+		HTML string `json:"html"`
+		Text string `json:"text"`
+		*Alias
+	}{
+		HTML:  i.AsHtml(),
+		Text:  i.AsText(),
+		Alias: (*Alias)(i),
+	})
+}

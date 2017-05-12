@@ -1,6 +1,8 @@
 package block
 
 import (
+	"encoding/json"
+
 	"github.com/SoCloz/goprismic/fragment/embed"
 )
 
@@ -25,4 +27,15 @@ func (e *Embed) AsHtml() string {
 
 func (e *Embed) ParentHtmlTag() string {
 	return ""
+}
+
+func (e *Embed) MarshalJSON() ([]byte, error) {
+	type Alias Embed
+	return json.Marshal(&struct {
+		HTML string `json:"html"`
+		*Alias
+	}{
+		HTML:  e.AsHtml(),
+		Alias: (*Alias)(e),
+	})
 }

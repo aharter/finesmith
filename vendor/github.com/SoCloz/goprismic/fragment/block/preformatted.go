@@ -1,6 +1,7 @@
 package block
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -19,4 +20,15 @@ func (p *Preformatted) AsHtml() string {
 
 func (p *Preformatted) ParentHtmlTag() string {
 	return ""
+}
+
+func (p *Preformatted) MarshalJSON() ([]byte, error) {
+	type Alias Preformatted
+	return json.Marshal(&struct {
+		HTML string `json:"html"`
+		*Alias
+	}{
+		HTML:  p.AsHtml(),
+		Alias: (*Alias)(p),
+	})
 }

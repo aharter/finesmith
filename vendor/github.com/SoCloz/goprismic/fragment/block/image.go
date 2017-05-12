@@ -1,6 +1,8 @@
 package block
 
 import (
+	"encoding/json"
+
 	"github.com/SoCloz/goprismic/fragment/image"
 )
 
@@ -25,4 +27,15 @@ func (i *Image) AsHtml() string {
 
 func (i *Image) ParentHtmlTag() string {
 	return ""
+}
+
+func (i *Image) MarshalJSON() ([]byte, error) {
+	type Alias Image
+	return json.Marshal(&struct {
+		HTML string `json:"html"`
+		*Alias
+	}{
+		HTML:  i.AsHtml(),
+		Alias: (*Alias)(i),
+	})
 }

@@ -1,6 +1,7 @@
 package fragment
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/SoCloz/goprismic/fragment/block"
@@ -125,4 +126,17 @@ func (st StructuredText) ResolveLinks(r link.Resolver) {
 	for _, v := range st {
 		v.ResolveLinks(r)
 	}
+}
+
+func (st *StructuredText) MarshalJSON() ([]byte, error) {
+	type Alias StructuredText
+	return json.Marshal(&struct {
+		Text     string `json:"text"`
+		HTML     string `json:"html"`
+		Children *Alias `json:"children"`
+	}{
+		Text:     st.AsText(),
+		HTML:     st.AsHtml(),
+		Children: (*Alias)(st),
+	})
 }

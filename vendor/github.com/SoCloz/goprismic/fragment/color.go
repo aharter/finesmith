@@ -1,6 +1,7 @@
 package fragment
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -28,3 +29,13 @@ func (c *Color) AsHtml() string {
 }
 
 func (c *Color) ResolveLinks(_ link.Resolver) {}
+
+func (c *Color) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Text string `json:"text"`
+		HTML string `json:"html"`
+	}{
+		Text: c.AsText(),
+		HTML: c.AsHtml(),
+	})
+}

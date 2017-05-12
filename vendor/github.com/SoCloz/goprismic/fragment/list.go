@@ -37,6 +37,13 @@ func (fs *List) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (fs List) MarshalJSON() ([]byte, error) {
+	if len(fs) == 1 {
+		return json.Marshal(fs[0])
+	}
+	return json.Marshal(fs)
+}
+
 func decode(t string, value interface{}) (Interface, error) {
 	var n Interface
 	var err error

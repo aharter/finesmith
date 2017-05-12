@@ -1,6 +1,7 @@
 package block
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -36,4 +37,15 @@ func (l *OrderedListItem) AsHtml() string {
 
 func (l *OrderedListItem) ParentHtmlTag() string {
 	return "ol"
+}
+
+func (l *OrderedListItem) MarshalJSON() ([]byte, error) {
+	type Alias OrderedListItem
+	return json.Marshal(&struct {
+		HTML string `json:"html"`
+		*Alias
+	}{
+		HTML:  l.AsHtml(),
+		Alias: (*Alias)(l),
+	})
 }
