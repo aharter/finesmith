@@ -11,6 +11,7 @@ type DocumentLink struct {
 		Id   string
 		Type string
 		Slug string
+		UID  string
 	}
 	Url      string
 	IsBroken bool
@@ -34,6 +35,9 @@ func (l *DocumentLink) Decode(enc interface{}) error {
 		}
 		if v, found := doc["slug"]; found {
 			l.Document.Slug = v.(string)
+		}
+		if v, found := doc["uid"]; found {
+			l.Document.UID = v.(string)
 		}
 	}
 	if v, found := dec["isBroken"]; found {

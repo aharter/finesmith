@@ -13,6 +13,7 @@ type Document struct {
 	Id        string        `json:"id"`
 	Type      string        `json:"type"`
 	Href      string        `json:"href"`
+	UID       string        `json:"uid"`
 	Tags      []string      `json:"tags"`
 	Slugs     []string      `json:"slugs"`
 	Fragments fragment.Tree `json:"data"`
