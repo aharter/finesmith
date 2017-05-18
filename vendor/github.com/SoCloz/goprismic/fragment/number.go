@@ -24,7 +24,7 @@ func (n *Number) AsText() string {
 }
 
 func (n *Number) AsHtml() string {
-	return fmt.Sprintf("<span class=\"number\">%f</span>", *n)
+	return fmt.Sprintf("<span>%f</span>", *n)
 }
 
 func (n *Number) ResolveLinks(_ link.Resolver) {}

@@ -25,7 +25,7 @@ func (t *Text) AsText() string {
 }
 
 func (t *Text) AsHtml() string {
-	return fmt.Sprintf("<span class=\"text\">%s</span>", *t)
+	return fmt.Sprintf("<span>%s</span>", *t)
 }
 
 func (t *Text) ResolveLinks(_ link.Resolver) {}

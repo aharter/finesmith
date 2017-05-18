@@ -45,8 +45,8 @@ func (g *Group) Decode(_ string, enc interface{}) error {
 func (g *Group) AsHtml() string {
 	html := ""
 	for _, v := range *g {
-		for name, fragment := range v {
-			html += fmt.Sprintf("<section data-field=\"%s\">%s</section>", name, fragment.AsHtml())
+		for _, fragment := range v {
+			html += fragment.AsHtml()
 		}
 	}
 	return html

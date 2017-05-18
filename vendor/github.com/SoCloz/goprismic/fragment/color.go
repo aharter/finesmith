@@ -25,7 +25,7 @@ func (c *Color) AsText() string {
 }
 
 func (c *Color) AsHtml() string {
-	return fmt.Sprintf("<span class=\"number\">%d</span>", *c)
+	return fmt.Sprintf("<span>%d</span>", *c)
 }
 
 func (c *Color) ResolveLinks(_ link.Resolver) {}

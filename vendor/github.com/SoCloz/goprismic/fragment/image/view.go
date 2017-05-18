@@ -50,7 +50,11 @@ func (i *View) AsText() string {
 }
 
 func (i *View) AsHtml() string {
-	return fmt.Sprintf("<img src=\"%s\" width=\"%d\" height=\"%d\"/>", i.Url, i.Dimensions.Width, i.Dimensions.Height)
+	alt := ""
+	if i.Alt != "" {
+		alt = fmt.Sprintf(" alt=\"%s\"", i.Alt)
+	}
+	return fmt.Sprintf("<img src=\"%s\" width=\"%d\" height=\"%d\"%s/>", i.Url, i.Dimensions.Width, i.Dimensions.Height, alt)
 }
 
 func (i *View) Ratio() float64 {
