@@ -64,12 +64,10 @@ func (p *PrismicWorker) processInterface(inter fragment.Interface, linkDepth int
 			// we only have 1 parent document
 			parentDocument := parentDocuments[0]
 
-			for _, parentPageResult := range parentDocument.Fragments {
-				for name, fragmentList := range parentPageResult {
-					frag := fragmentList[0]
-					t.Children[name] = frag
-				}
-			}
+			// Make sure URL is resolved
+			parentDocument.ResolveLinks(p.resolver)
+			// Replace link with goprismic.DocumentLink containing the data
+			t.Link = parentDocument.AsDocumentLink()
 		}
 		break
 	case *fragment.Group:

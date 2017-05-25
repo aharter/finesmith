@@ -31,32 +31,37 @@ func (l *Link) ResolveLinks(r link.Resolver) {
 }
 
 func (l *Link) MarshalJSON() ([]byte, error) {
-	switch t := l.Link.(type) {
-	default:
+	marshalLink := func(l *Link) ([]byte, error) {
 		return json.Marshal(&struct {
-			Children map[string]Interface `json:"children"`
-			HTML     string               `json:"html"`
-			Text     string               `json:"text"`
-			URL      string               `json:"url"`
+			HTML string `json:"html"`
+			Text string `json:"text"`
+			URL  string `json:"url"`
 		}{
-			Children: l.Children,
-			HTML:     l.AsHtml(),
-			Text:     l.AsHtml(),
-			URL:      l.Link.GetUrl(),
-		})
-	case *link.DocumentLink:
-		return json.Marshal(&struct {
-			Children map[string]Interface `json:"children"`
-			HTML     string               `json:"html"`
-			Text     string               `json:"text"`
-			URL      string               `json:"url"`
-			UID      string               `json:"uid"`
-		}{
-			Children: l.Children,
-			HTML:     l.AsHtml(),
-			Text:     l.AsHtml(),
-			URL:      l.Link.GetUrl(),
-			UID:      t.Document.UID,
+			HTML: l.AsHtml(),
+			Text: l.AsText(),
+			URL:  l.Link.GetUrl(),
 		})
 	}
+
+	switch t := l.Link.(type) {
+	default:
+		return json.Marshal(t)
+	case *link.WebLink:
+		return marshalLink(l)
+	case *link.MediaLink:
+		return marshalLink(l)
+	case *link.DocumentLink:
+		return json.Marshal(&struct {
+			HTML string `json:"html"`
+			Text string `json:"text"`
+			URL  string `json:"url"`
+			UID  string `json:"uid"`
+		}{
+			HTML: l.AsHtml(),
+			Text: l.AsText(),
+			URL:  l.Link.GetUrl(),
+			UID:  t.Document.UID,
+		})
+	}
+
 }

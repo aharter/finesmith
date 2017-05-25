@@ -1,12 +1,35 @@
 package goprismic
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/SoCloz/goprismic/fragment"
 	"github.com/SoCloz/goprismic/fragment/block"
 	"github.com/SoCloz/goprismic/fragment/link"
 )
+
+type DocumentLink struct {
+	*link.DocumentLink
+	Children fragment.Fragments
+}
+
+func (l *DocumentLink) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		HTML     string             `json:"html"`
+		Text     string             `json:"text"`
+		URL      string             `json:"url"`
+		UID      string             `json:"uid"`
+		Children fragment.Fragments `json:"children"`
+	}{
+		HTML:     fmt.Sprintf("<a href=\"%s\">%s</a>", l.GetUrl(), l.GetText()),
+		Text:     l.GetText(),
+		URL:      l.GetUrl(),
+		UID:      l.Document.UID,
+		Children: l.Children,
+	})
+}
 
 // A document is made of fragments of various types
 type Document struct {
@@ -17,6 +40,7 @@ type Document struct {
 	Tags      []string      `json:"tags"`
 	Slugs     []string      `json:"slugs"`
 	Fragments fragment.Tree `json:"data"`
+	URL       string        `json:"url,omitempty"`
 }
 
 // Returns the document slug
@@ -45,6 +69,7 @@ func (d *Document) ResolveLinks(r link.Resolver) {
 			list[k].ResolveLinks(r)
 		}
 	}
+	d.URL = r(d.AsDocumentLink())
 }
 
 // Returns the list of fragments of a certain name
@@ -228,4 +253,31 @@ func (d *Document) GetGeoPointFragment(field string) (*fragment.GeoPoint, bool) 
 		return nil, false
 	}
 	return gp, true
+}
+
+func (d *Document) AsDocumentLink() *DocumentLink {
+	docLink := &link.DocumentLink{
+		Document: struct {
+			Id   string
+			Type string
+			Slug string
+			UID  string
+		}{
+			Id:   d.Id,
+			Type: d.Type,
+			Slug: d.GetSlug(),
+			UID:  d.UID,
+		},
+		Url:      d.URL,
+		IsBroken: false,
+	}
+
+	l := &DocumentLink{DocumentLink: docLink, Children: make(fragment.Fragments)}
+	for _, parentPageResult := range d.Fragments {
+		for name, fragmentList := range parentPageResult {
+			l.Children[name] = fragmentList
+		}
+	}
+
+	return l
 }
