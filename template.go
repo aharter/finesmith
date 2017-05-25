@@ -73,12 +73,12 @@ func (t *TemplateProcessor) ProcessFile(fpath string, info os.FileInfo, err erro
 		return errors.New("No layout defined")
 	}
 
-	country, hasCountry := templateContent["layout"]
-	if !hasCountry {
-		return fmt.Errorf("No country defined in %s", fpath)
-	}
-
 	if prismic, usesPrismic := templateContent["prismic"]; usesPrismic {
+		country, hasCountry := templateContent["country"]
+		if !hasCountry {
+			return fmt.Errorf("No country defined in %s", fpath)
+		}
+
 		prismicSettings, ok := prismic.(map[string]interface{})
 		if !ok {
 			return fmt.Errorf("Prismic config not a map %s", prismic)
