@@ -19,7 +19,7 @@ func (l *Link) Decode(t string, enc interface{}) error {
 }
 
 func (l *Link) AsText() string {
-	return l.Link.GetUrl()
+	return l.Link.GetText()
 }
 
 func (l *Link) AsHtml() string {
