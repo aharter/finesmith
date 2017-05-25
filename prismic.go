@@ -43,7 +43,7 @@ func NewPrismicWorker(url string, token string, worker chan *PrismicPageJob, res
 	return nil
 }
 
-func (p *PrismicWorker) processInterface(inter fragment.Interface, linkDepth int) fragment.Interface {
+func (p *PrismicWorker) fetchSubdocuments(inter fragment.Interface, linkDepth int) fragment.Interface {
 	if linkDepth <= 0 {
 		return inter
 	}
@@ -73,7 +73,7 @@ func (p *PrismicWorker) processInterface(inter fragment.Interface, linkDepth int
 	case *fragment.Group:
 		for _, groupFragments := range *t {
 			for groupFragmentName, groupFragment := range groupFragments {
-				groupFragments[groupFragmentName] = p.processInterface(groupFragment, linkDepth)
+				groupFragments[groupFragmentName] = p.fetchSubdocuments(groupFragment, linkDepth)
 			}
 		}
 	}
@@ -84,7 +84,7 @@ func (p *PrismicWorker) processInterface(inter fragment.Interface, linkDepth int
 func (p *PrismicWorker) processFragmentList(fragments *fragment.Fragments, linkDepth int) {
 	for _, currentFragment := range *fragments {
 		for fragmentPieceIndex, fragmentPiece := range currentFragment {
-			currentFragment[fragmentPieceIndex] = p.processInterface(fragmentPiece, linkDepth)
+			currentFragment[fragmentPieceIndex] = p.fetchSubdocuments(fragmentPiece, linkDepth)
 		}
 	}
 }
