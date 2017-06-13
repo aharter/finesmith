@@ -10,6 +10,9 @@ import (
 	"github.com/SoCloz/goprismic/proxy"
 )
 
+const prismicDefaultPageSize = 100
+const prismicMaxPageSize = 100
+
 type PrismicPageJob struct {
 	Layout      string
 	ContentData map[string]interface{}
@@ -27,6 +30,8 @@ type PrismicQuery struct {
 	FormName   string  `json:"formName,omitempty"`
 	LinkDepth  int     `json:"linkDepth,omitempty"`
 	Ref        *string `json:"ref,omitempty"`
+	PageSize   *int    `json:"pageSize,omitempty"`
+	AllPages   *bool   `json:"allPages,omitempty"`
 }
 
 type PrismicWorker struct {
@@ -89,7 +94,7 @@ func (p *PrismicWorker) processFragmentList(fragments *fragment.Fragments, linkD
 	}
 }
 
-func (p *PrismicWorker) prisimicLookup(page PrismicQuery) ([]goprismic.Document, error) {
+func (p *PrismicWorker) prismicSearch(page PrismicQuery) (*goprismic.SearchResult, error) {
 	var query string
 	const QueryByID = "[[:d = at(document.id, \"%s\")]]"
 	if page.Query != "" {
@@ -104,32 +109,64 @@ func (p *PrismicWorker) prisimicLookup(page PrismicQuery) ([]goprismic.Document,
 		page.FormName = "everything"
 	}
 
-	var err error
-	var prismicDocuments *goprismic.SearchResult
+	pageSize := prismicDefaultPageSize
+	if page.PageSize != nil {
+		if *page.PageSize > prismicMaxPageSize {
+			pageSize = prismicMaxPageSize
+		} else {
+			pageSize = *page.PageSize
+		}
+	}
+
 	if page.Ref == nil {
-		prismicDocuments, err = p.api.Search().
+		return p.api.Search().
 			Form(page.FormName).
-			PageSize(100).
+			PageSize(pageSize).
 			Query(query).Submit()
+	}
+
+	return p.api.Direct().
+		ForceRef(*page.Ref).
+		Form(page.FormName).
+		PageSize(pageSize).
+		Query(query).Submit()
+}
+
+func (p *PrismicWorker) prisimicLookup(page PrismicQuery) ([]goprismic.Document, error) {
+	var result *goprismic.SearchResult
+	var err error
+	prismicDocuments := make([]goprismic.Document, 0)
+	if page.AllPages != nil && *page.AllPages {
+		*page.AllPages = false
+		page.PageSize = new(int)
+		*page.PageSize = prismicMaxPageSize
+
+		result, err = p.prismicSearch(page)
+		for err == nil {
+			prismicDocuments = append(prismicDocuments, result.Results...)
+			if result.TotalPages != *page.PageSize {
+				break
+			}
+			result, err = p.prismicSearch(page)
+		}
 	} else {
-		prismicDocuments, err = p.api.Direct().
-			ForceRef(*page.Ref).
-			Form(page.FormName).
-			Query(query).Submit()
+		// If 'page.AllPages' is not set
+		result, err = p.prismicSearch(page)
+		prismicDocuments = append(prismicDocuments, result.Results...)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	for _, currentDocument := range prismicDocuments.Results {
+	for _, currentDocument := range prismicDocuments {
 		currentDocument.ResolveLinks(p.resolver)
 		for _, currentFragments := range currentDocument.Fragments {
 			p.processFragmentList(&currentFragments, page.LinkDepth)
 		}
 	}
 
-	return prismicDocuments.Results, nil
+	return prismicDocuments, nil
 }
 
 func (p *PrismicWorker) Query(page PrismicQuery) ([]map[string]interface{}, error) {
