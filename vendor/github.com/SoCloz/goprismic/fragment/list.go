@@ -44,6 +44,10 @@ func (fs List) MarshalJSON() ([]byte, error) {
 	return json.Marshal(fs)
 }
 
+func ExtDecode(t string, value interface{}) (Interface, error) {
+	return decode(t, value)
+}
+
 func decode(t string, value interface{}) (Interface, error) {
 	var n Interface
 	var err error
@@ -75,6 +79,8 @@ func decode(t string, value interface{}) (Interface, error) {
 		n = new(GeoPoint)	
 	case "Group":
 		n, err = NewGroup(value)
+	case "SliceZone":
+		n, err = NewSliceZone(value)
 	}
 	if err != nil {
 		return nil, err
