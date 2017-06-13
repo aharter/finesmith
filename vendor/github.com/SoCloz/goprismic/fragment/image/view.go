@@ -24,10 +24,10 @@ func (i *View) Decode(enc interface{}) error {
 	if v, found := dec["url"]; found {
 		i.Url = v.(string)
 	}
-	if v, found := dec["alt"]; found {
+	if v, found := dec["alt"]; found && v != nil {
 		i.Alt = v.(string)
 	}
-	if v, found := dec["copyright"]; found {
+	if v, found := dec["copyright"]; found && v != nil {
 		i.Copyright = v.(string)
 	}
 	if d, found := dec["dimensions"]; found {
