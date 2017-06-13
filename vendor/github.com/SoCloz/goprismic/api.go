@@ -123,6 +123,10 @@ func (a *Api) Ref(label string) *SearchForm {
 	return &SearchForm{err: fmt.Errorf("No ref found with label '%s'", label)}
 }
 
+func (a *Api) ForceRef(refID string) *SearchForm {
+	return a.createSearchForm(Ref{Ref: refID})
+}
+
 func (a *Api) createSearchForm(r Ref) *SearchForm {
 	f := &SearchForm{api: a, ref: r}
 	f.data = make(map[string]string)

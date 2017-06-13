@@ -19,14 +19,14 @@ type PrismicPageJob struct {
 }
 
 type PrismicQuery struct {
-	QueryKey   string `json:"-"`
-	Query      string `json:"query,omitempty"`
-	Bookmark   string `json:"bookmark,omitempty"`
-	DocumentID string `json:"documentID,omitempty"`
-	Orderings  string `json:"orderings,omitempty"`
-	FormName   string `json:"formName,omitempty"`
-	LinkDepth  int    `json:"linkDepth,omitempty"`
-	Ref        string `json:"ref,omitempty"`
+	QueryKey   string  `json:"-"`
+	Query      string  `json:"query,omitempty"`
+	Bookmark   string  `json:"bookmark,omitempty"`
+	DocumentID string  `json:"documentID,omitempty"`
+	Orderings  string  `json:"orderings,omitempty"`
+	FormName   string  `json:"formName,omitempty"`
+	LinkDepth  int     `json:"linkDepth,omitempty"`
+	Ref        *string `json:"ref,omitempty"`
 }
 
 type PrismicWorker struct {
@@ -106,10 +106,15 @@ func (p *PrismicWorker) prisimicLookup(page PrismicQuery) ([]goprismic.Document,
 
 	var err error
 	var prismicDocuments *goprismic.SearchResult
-	if page.Ref == "" {
+	if page.Ref == nil {
 		prismicDocuments, err = p.api.Search().
 			Form(page.FormName).
 			PageSize(100).
+			Query(query).Submit()
+	} else {
+		prismicDocuments, err = p.api.Direct().
+			ForceRef(*page.Ref).
+			Form(page.FormName).
 			Query(query).Submit()
 	}
 
