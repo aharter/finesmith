@@ -1,6 +1,7 @@
 package block
 
 import (
+	"bytes"
 	"fmt"
 	"html"
 
@@ -19,32 +20,68 @@ func (b *BaseBlock) AsText() string {
 	return b.Text
 }
 
-// Formats the block content as html, without enclosing tags
+func contains(arr []int, val int) bool {
+	for _, v := range arr {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
+// FormatHtmlText adds HTML tags to the text and returns it.
 func (b *BaseBlock) FormatHtmlText() string {
 	t := html.EscapeString(b.Text)
-	// store one more to be able to compute offsets[len(text)]
-	offsets := make([]int, len(b.Text)+1)
-	// compute byte offsets for utf8 string
-	off := 0
+
+	// Create mapping of start/end index and spans for easier lookup
+	endTags := make(map[int][]span.SpanInterface)
+	beginTags := make(map[int][]span.SpanInterface)
+	for _, s := range b.Spans {
+		if _, ok := endTags[s.GetEnd()]; !ok {
+			endTags[s.GetEnd()] = make([]span.SpanInterface, 0)
+		}
+		if _, ok := beginTags[s.GetStart()]; !ok {
+			beginTags[s.GetStart()] = make([]span.SpanInterface, 0)
+		}
+
+		endTags[s.GetEnd()] = append(endTags[s.GetEnd()], s)
+		beginTags[s.GetStart()] = append(beginTags[s.GetStart()], s)
+	}
+
+	// Create mapping between Span and UTF-8 offsets
+	offsets := make([]int, len(t))
 	index := 0
-	for k, r := range b.Text {
-		offsets[index] = k + off
-		off += len([]rune(html.EscapeString(string([]rune{r})))) - 1
+	for k := range t {
+		offsets[k] = index
 		index++
 	}
-	offsets[index] = len(b.Text) + off
-	for _, s := range b.Spans {
-		begin := s.HtmlBeginTag()
-		end := s.HtmlEndTag()
-		t = t[:offsets[s.GetStart()]] + begin + t[offsets[s.GetStart()]:offsets[s.GetEnd()]] + end + t[offsets[s.GetEnd()]:]
-		for i := s.GetStart(); i < s.GetEnd(); i++ {
-			offsets[i] += len(begin)
+
+	var buffer bytes.Buffer
+
+	for i, r := range t {
+		if v, contains := endTags[offsets[i]]; contains {
+			// Reverse iteration to close tags in correct order
+			for k := len(v) - 1; k >= 0; k-- {
+				buffer.WriteString(v[k].HtmlEndTag())
+			}
 		}
-		for i := s.GetEnd(); i < len(offsets); i++ {
-			offsets[i] += len(begin) + len(end)
+
+		if v, contains := beginTags[offsets[i]]; contains {
+			for _, currentSpan := range v {
+				buffer.WriteString(currentSpan.HtmlBeginTag())
+			}
+		}
+
+		buffer.WriteRune(r)
+	}
+
+	// Close end tags
+	if v, contains := endTags[len(t)]; contains {
+		for k := len(v) - 1; k >= 0; k-- {
+			buffer.WriteString(v[k].HtmlEndTag())
 		}
 	}
-	return t
+	return buffer.String()
 }
 
 func (b *BaseBlock) decodeBlock(enc interface{}) error {
